@@ -5,6 +5,9 @@
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
+ *
+ * 10/19/20 - Additional modifications to add multi-button group support if you have trouble with them on a single page.
+ * -Arie Vandenberg
  */
 
 namespace dmstr\ajaxbutton;
@@ -73,11 +76,11 @@ use yii\web\JsExpression;
  */
 class AjaxButton extends Widget
 {
-
     public $content;
     public $options;
     public $method = 'post';
     public $params = [];
+    public $group_class_id;
     public $url;
 
     public $errorExpression = false;
@@ -91,6 +94,7 @@ class AjaxButton extends Widget
 
         $this->registerAssets();
 
+        $this->options['id'] = $this->id;
         $this->options['data-ajax-button-id'] = $this->id;
         $this->options['data-ajax-button-method'] = $this->method;
         $this->options['data-ajax-button-params'] = $this->params;
@@ -114,15 +118,16 @@ class AjaxButton extends Widget
      */
     protected function registerAssets()
     {
-
         if (\is_array($this->ajaxSettings)) {
             $this->ajaxSettings = explode(',', $this->ajaxSettings);
         }
 
         $this->view->registerJs(<<<JS
-$(document).on('click','button[data-ajax-button-id]', 'click', function() {
-    var button = $(this);
+$('button.{$this->group_class_id}').click(function() {
+    var button = $(this);    
+    
     $.ajax({
+        async : false,
         url : button.data('ajax-button-url'),
         type : button.data('ajax-button-method'),
         data : button.data('ajax-button-params'),
